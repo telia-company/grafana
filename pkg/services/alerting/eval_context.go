@@ -15,6 +15,7 @@ type EvalContext struct {
 	Firing         bool
 	IsTestRun      bool
 	EvalMatches    []*EvalMatch
+	EvalNotMatches []*EvalNotMatch
 	Logs           []*ResultLogEntry
 	Error          error
 	ConditionEvals string
@@ -40,6 +41,7 @@ func NewEvalContext(alertCtx context.Context, rule *Rule) *EvalContext {
 		Rule:           rule,
 		Logs:           make([]*ResultLogEntry, 0),
 		EvalMatches:    make([]*EvalMatch, 0),
+		EvalNotMatches: make([]*EvalNotMatch, 0),
 		log:            log.New("alerting.evalContext"),
 		PrevAlertState: rule.State,
 	}
