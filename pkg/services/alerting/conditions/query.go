@@ -54,6 +54,7 @@ func (c *QueryCondition) Eval(context *alerting.EvalContext) (*alerting.Conditio
 	emptySeriesCount := 0
 	evalMatchCount := 0
 	var matches []*alerting.EvalMatch
+	var notMatches []*alerting.EvalNotMatch
 
 	for _, series := range seriesList {
 		reducedValue := c.Reducer.Reduce(series)
@@ -77,6 +78,12 @@ func (c *QueryCondition) Eval(context *alerting.EvalContext) (*alerting.Conditio
 				Value:  reducedValue,
 				Tags:   series.Tags,
 			})
+		} else {
+			notMatches = append(notMatches, &alerting.EvalNotMatch{
+				Metric: series.Name,
+				Value:  reducedValue,
+				Tags:   series.Tags,
+			})
 		}
 	}
 
@@ -94,14 +101,16 @@ func (c *QueryCondition) Eval(context *alerting.EvalContext) (*alerting.Conditio
 		if evalMatch {
 			evalMatchCount++
 			matches = append(matches, &alerting.EvalMatch{Metric: "NoData", Value: null.FloatFromPtr(nil)})
+			notMatches = append(notMatches, &alerting.EvalNotMatch{Metric: "NoData", Value: null.FloatFromPtr(nil)})
 		}
 	}
 
 	return &alerting.ConditionResult{
-		Firing:      evalMatchCount > 0,
-		NoDataFound: emptySeriesCount == len(seriesList),
-		Operator:    c.Operator,
-		EvalMatches: matches,
+		Firing:         evalMatchCount > 0,
+		NoDataFound:    emptySeriesCount == len(seriesList),
+		Operator:       c.Operator,
+		EvalMatches:    matches,
+		EvalNotMatches: notMatches,
 	}, nil
 }
 
