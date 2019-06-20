@@ -48,6 +48,7 @@ var (
 	binaries              []string = []string{serverBinary, cliBinary}
 	isDev                 bool     = false
 	enterprise            bool     = false
+	telia                 bool     = false
 	skipRpmGen            bool     = false
 	skipDebGen            bool     = false
 	printGenVersion       bool     = false
@@ -70,6 +71,7 @@ func main() {
 	flag.BoolVar(&race, "race", race, "Use race detector")
 	flag.BoolVar(&includeBuildId, "includeBuildId", includeBuildId, "IncludeBuildId in package name")
 	flag.BoolVar(&enterprise, "enterprise", enterprise, "Build enterprise version of Grafana")
+	flag.BoolVar(&telia, "telia", telia, "Build telia version of Grafana")
 	flag.StringVar(&buildIdRaw, "buildId", "0", "Build ID from CI system")
 	flag.BoolVar(&isDev, "dev", isDev, "optimal for development, skips certain steps")
 	flag.BoolVar(&skipRpmGen, "skipRpm", skipRpmGen, "skip rpm package generation (default: false)")
@@ -373,6 +375,9 @@ func createPackage(options linuxPackageOptions) {
 	name := "grafana"
 	if enterprise {
 		name += "-enterprise"
+		args = append(args, "--replaces", "grafana")
+	} else if telia {
+		name += "-telia"
 		args = append(args, "--replaces", "grafana")
 	}
 	fmt.Printf("pkgArch is set to '%s', generated arch is '%s'\n", pkgArch, options.packageArch)
